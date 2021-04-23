@@ -47,6 +47,27 @@ function setAttributes(target: HTMLElement, attrs: Attributes) {
   }
 }
 
+function updateAttributes(
+  target: HTMLElement,
+  oldAttrs: Attributes,
+  newAttrs: Attributes
+): void {
+  for (let attr in oldAttrs) {
+    if (!isEventAttr(attr)) {
+      target.removeAttribute(attr);
+    }
+  }
+  for (let attr in newAttrs) {
+    if (!isEventAttr(attr)) {
+      target.setAttribute(attr, newAttrs[attr] as string);
+    }
+  }
+}
+
+function updateValue(target: HTMLInputElement, newValue: string) {
+  target.value = newValue
+}
+
 // Nodeを受け取り仮想DOMかどうかを判定
 function isVNode(node: NodeType): node is VNode {
   return typeof node !== "string" && typeof node !== "number"
@@ -66,15 +87,13 @@ enum ChangeType {
   Attr
 }
 
-function hasChanged(a: NodeType, b: NodeType): ChangeType {
+const hasChanged = (a: NodeType, b: NodeType): ChangeType => {
   if (typeof a !== typeof b) {
     return ChangeType.Type
   }
-
   if (!isVNode(a) && a !== b) {
     return ChangeType.Text
   }
-
   if (isVNode(a) && isVNode(b)) {
     if (a.nodeName !== b.nodeName) {
       return ChangeType.Node
@@ -95,12 +114,12 @@ export function updateElement(
   newNode: NodeType,
   index: number = 0,
 ): void {
-  if (!oldNode) {
+  if (oldNode === null || undefined) {
     parent.appendChild(createElement(newNode))
     return
   }
   const target = parent.childNodes[index]
-  if (!newNode) {
+  if (newNode === null || undefined) {
     parent.removeChild(target)
     return
   }
@@ -111,20 +130,20 @@ export function updateElement(
     case ChangeType.Text:
     case ChangeType.Node:
       parent.replaceChild(createElement(newNode), target)
-      break;
+      return;
     case ChangeType.Value:
       updateValue(
         target as HTMLInputElement,
         (newNode as VNode).attributes.value as string
       )
-      break;
+      return;
     case ChangeType.Attr:
       updateAttributes(
         target as HTMLElement,
         (oldNode as VNode).attributes,
         (newNode as VNode).attributes
       )
-      break;
+      return;
   }
 
   if (isVNode(oldNode) && isVNode(newNode)) {
@@ -141,25 +160,4 @@ export function updateElement(
       );
     }
   }
-}
-
-function updateAttributes(
-  target: HTMLElement,
-  oldAttrs: Attributes,
-  newAttrs: Attributes
-): void {
-  for (let attr in oldAttrs) {
-    if (!isEventAttr(attr)) {
-      target.removeAttribute(attr);
-    }
-  }
-  for (let attr in newAttrs) {
-    if (!isEventAttr(attr)) {
-      target.setAttribute(attr, newAttrs[attr] as string);
-    }
-  }
-}
-
-function updateValue(target: HTMLInputElement, newValue: string) {
-  target.value = newValue
 }

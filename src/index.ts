@@ -1,4 +1,4 @@
-import { View, h } from './framework//view'
+import { View, h, VNode } from './framework//view'
 import { ActionTree } from './framework/action'
 import { App } from './framework/controller'
 
@@ -19,13 +19,14 @@ const actions: ActionTree<State> = {
 }
 
 const view: View<State, Actions> = (state, actions) => {
-  return h(
+  const virtualNode: VNode = h(
     "div",
-    null,
-    h("p", null, state.count),
+    {},
+    h("p", {}, state.count),
     h("button", {type: "button", onclick: () => actions.increment(state)}, 'countUp'),
     h("button", {type: "button", onclick: () => actions.decrement(state)}, 'countDown'),
   )
+  return virtualNode
 }
 
 new App<State, Actions>({
