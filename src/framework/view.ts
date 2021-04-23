@@ -128,17 +128,21 @@ export const updateElement = (
   newNode: NodeType,
   index: number = 0,
 ): void => {
-  if (oldNode === null || undefined) {
+  console.log('old', oldNode)
+  console.log('new', newNode)
+  if (oldNode === null || oldNode === undefined) {
     parent.appendChild(createElement(newNode))
     return
   }
   const target = parent.childNodes[index]
-  if (newNode === null || undefined) {
+  console.log('target', target)
+  if (newNode === null || newNode === undefined) {
     parent.removeChild(target)
     return
   }
 
   const changeType = hasChanged(oldNode, newNode);
+  console.log(changeType)
   // 型, Text, Nodeに変更があったときは新しい実DOMを作って置き換える。
   // Inputの値に変更があったときは値だけを更新。
   // 属性に変更があった時は属性だけを更新。
