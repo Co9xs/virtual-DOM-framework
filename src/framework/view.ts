@@ -85,3 +85,78 @@ function hasChanged(a: NodeType, b: NodeType): ChangeType {
   }
   return ChangeType.None
 }
+
+export function updateElement(
+  parent: HTMLElement,
+  oldNode: NodeType,
+  newNode: NodeType,
+  index: number = 0,
+): void {
+  if (!oldNode) {
+    parent.appendChild(createElement(newNode))
+    return
+  }
+  const target = parent.childNodes[index]
+  if (!newNode) {
+    parent.removeChild(target)
+    return
+  }
+
+  const changeType = hasChanged(oldNode, newNode);
+  switch (changeType) {
+    case ChangeType.Type:
+    case ChangeType.Text:
+    case ChangeType.Node:
+      parent.replaceChild(createElement(newNode), target)
+      break;
+    case ChangeType.Value:
+      updateValue(
+        target as HTMLInputElement,
+        (newNode as VNode).attributes.value as string
+      )
+      break;
+    case ChangeType.Attr:
+      updateAttributes(
+        target as HTMLElement,
+        (oldNode as VNode).attributes,
+        (newNode as VNode).attributes
+      )
+      break;
+  }
+
+  if (isVNode(oldNode) && isVNode(newNode)) {
+    for (
+      let i = 0;
+      i < newNode.children.length || i < oldNode.children.length;
+      i++
+    ) {
+      updateElement(
+        target as HTMLElement,
+        oldNode.children[i],
+        newNode.children[i],
+        i
+      );
+    }
+  }
+}
+
+function updateAttributes(
+  target: HTMLElement,
+  oldAttrs: Attributes,
+  newAttrs: Attributes
+): void {
+  for (let attr in oldAttrs) {
+    if (!isEventAttr(attr)) {
+      target.removeAttribute(attr);
+    }
+  }
+  for (let attr in newAttrs) {
+    if (!isEventAttr(attr)) {
+      target.setAttribute(attr, newAttrs[attr] as string);
+    }
+  }
+}
+
+function updateValue(target: HTMLInputElement, newValue: string) {
+  target.value = newValue
+}
