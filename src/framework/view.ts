@@ -139,6 +139,9 @@ export const updateElement = (
   }
 
   const changeType = hasChanged(oldNode, newNode);
+  // 型, Text, Nodeに変更があったときは新しい実DOMを作って置き換える。
+  // Inputの値に変更があったときは値だけを更新。
+  // 属性に変更があった時は属性だけを更新。
   switch (changeType) {
     case ChangeType.Type:
     case ChangeType.Text:
