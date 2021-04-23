@@ -11,6 +11,9 @@ export interface VNode {
   attributes: Attributes;
   children: NodeType[];
 }
+export interface View<State, Actions> {
+  (state: State, actions: Actions): VNode
+}
 
 // タグ名,属性,子ノードから仮想DOMを返す関数
 export function h(
