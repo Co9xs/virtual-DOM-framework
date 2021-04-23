@@ -1,5 +1,6 @@
 // Nodeが取りうる3種の型
 type NodeType = VNode | string | number
+
 // 属性の型
 type Attributes = {
   [key: string]: string | Function
@@ -11,21 +12,23 @@ export interface VNode {
   attributes: Attributes;
   children: NodeType[];
 }
+
+// viewの型
 export interface View<State, Actions> {
   (state: State, actions: Actions): VNode
 }
 
 // タグ名,属性,子ノードから仮想DOMを返す関数
-export function h(
+export const h = (
   nodeName: keyof HTMLElementTagNameMap,
   attributes: Attributes,
   ...children: NodeType[]
-): VNode {
+): VNode => {
   return { nodeName, attributes, children }
 }
 
 // 仮想DOMからリアルDOMを生成する関数
-export function createElement(node: NodeType): HTMLElement | Text {
+export const createElement = (node: NodeType): HTMLElement | Text => {
   if (!isVNode(node)) {
     return document.createTextNode(node.toString())
   }
@@ -36,7 +39,7 @@ export function createElement(node: NodeType): HTMLElement | Text {
 }
 
 // onClickなどのイベントのときはイベントリスナを登録、それ以外は属性として登録する関数
-function setAttributes(target: HTMLElement, attrs: Attributes) {
+const setAttributes = (target: HTMLElement, attrs: Attributes) => {
   for (let attr in attrs) {
     if (isEventAttr(attr)) {
       const eventName = attr.slice(2);
@@ -47,37 +50,46 @@ function setAttributes(target: HTMLElement, attrs: Attributes) {
   }
 }
 
-function updateAttributes(
+// 一度すべての属性とイベントリスナを削除して新しいものを登録し直す関数
+const updateAttributes = (
   target: HTMLElement,
   oldAttrs: Attributes,
   newAttrs: Attributes
-): void {
+): void => {
   for (let attr in oldAttrs) {
     if (!isEventAttr(attr)) {
       target.removeAttribute(attr);
+    } else {
+      const eventName = attr.slice(2);
+      target.removeEventListener(eventName, oldAttrs[attr] as EventListener)
     }
   }
   for (let attr in newAttrs) {
     if (!isEventAttr(attr)) {
       target.setAttribute(attr, newAttrs[attr] as string);
+    } else {
+      const eventName = attr.slice(2);
+      target.addEventListener(eventName, oldAttrs[attr] as EventListener)
     }
   }
 }
 
-function updateValue(target: HTMLInputElement, newValue: string) {
+// Inputタグのvalueを更新する関数
+const updateValue = (target: HTMLInputElement, newValue: string) => {
   target.value = newValue
 }
 
 // Nodeを受け取り仮想DOMかどうかを判定
-function isVNode(node: NodeType): node is VNode {
+const isVNode = (node: NodeType): node is VNode => {
   return typeof node !== "string" && typeof node !== "number"
 }
 
 //属性を受け取りイベントかどうかを判定
-function isEventAttr(attr: string): boolean {
+const isEventAttr = (attr: string): boolean => {
   return /^on/.test(attr);
 }
 
+// 何に変化が起こったのかを示すenum
 enum ChangeType {
   None,
   Type,
@@ -87,6 +99,7 @@ enum ChangeType {
   Attr
 }
 
+// 新旧2つのNodeをとって変化した部分を判定する関数
 const hasChanged = (a: NodeType, b: NodeType): ChangeType => {
   if (typeof a !== typeof b) {
     return ChangeType.Type
@@ -108,12 +121,13 @@ const hasChanged = (a: NodeType, b: NodeType): ChangeType => {
   return ChangeType.None
 }
 
-export function updateElement(
+// 仮想DOMで変化のあった部分をリアルDOMに反映する関数
+export const updateElement = (
   parent: HTMLElement,
   oldNode: NodeType,
   newNode: NodeType,
   index: number = 0,
-): void {
+): void => {
   if (oldNode === null || undefined) {
     parent.appendChild(createElement(newNode))
     return
@@ -146,6 +160,7 @@ export function updateElement(
       return;
   }
 
+  // childrenに対して再帰的にupdateElement()を実行する
   if (isVNode(oldNode) && isVNode(newNode)) {
     for (
       let i = 0;
