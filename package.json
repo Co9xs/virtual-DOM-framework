@@ -1,0 +1,25 @@
+{
+  "name": "virtual-dom-framework",
+  "version": "1.0.0",
+  "description": "This repository is practice of virtual-DOM-framework. The goal of this handson is to make React and Vue not just black box frameworks, but to be able to understand and use what's inside. This is based on this article.(https://kuroeveryday.blogspot.com/2018/11/how-to-create-virtual-dom-framework.html)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Co9xs/virtual-DOM-practice.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Co9xs/virtual-DOM-practice/issues"
+  },
+  "homepage": "https://github.com/Co9xs/virtual-DOM-practice#readme",
+  "devDependencies": {
+    "ts-loader": "^9.1.0",
+    "typescript": "^4.2.4",
+    "webpack": "^5.35.0",
+    "webpack-cli": "^4.6.0"
+  }
+}
