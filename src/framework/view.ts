@@ -53,3 +53,35 @@ function isVNode(node: NodeType): node is VNode {
 function isEventAttr(attr: string): boolean {
   return /^on/.test(attr);
 }
+
+enum ChangeType {
+  None,
+  Type,
+  Text,
+  Node,
+  Value,
+  Attr
+}
+
+function hasChanged(a: NodeType, b: NodeType): ChangeType {
+  if (typeof a !== typeof b) {
+    return ChangeType.Type
+  }
+
+  if (!isVNode(a) && a !== b) {
+    return ChangeType.Text
+  }
+
+  if (isVNode(a) && isVNode(b)) {
+    if (a.nodeName !== b.nodeName) {
+      return ChangeType.Node
+    }
+    if (a.attributes.value !== b.attributes.value) {
+      return ChangeType.Value
+    }
+    if (JSON.stringify(a.attributes) !== JSON.stringify(b.attributes)) {
+      return ChangeType.Attr
+    }
+  }
+  return ChangeType.None
+}
